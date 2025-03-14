@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useChatStore } from "../store/userChatStore";
 import { useAuthStore } from "../../store/useAuthStore";
-import ChatHeader from "./ChatHeader"
+import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeleton";
 import { formatMessageTime } from "../lib/utils";
@@ -13,8 +13,15 @@ const ChatContainer = () => {
     getMessage,
     selectedUser,
     subscribeToMessage,
-    unsubscribeToMessage,
+    unsubscribeFromMessage,
+    isFriend,
+    friendRequestSent,
+    friendRequestReceived,
     isMessageLoading,
+    addFriend,
+    setIsFreind,
+    setFriendRequestSent,
+    setfriendRequestReceived,
   } = useChatStore();
   const { authUser } = useAuthStore();
   const messageEndRef = useRef(null);
@@ -24,13 +31,24 @@ const ChatContainer = () => {
     getMessage(selectedUser._id);
     //listen
     subscribeToMessage();
-  }, [selectedUser._id, subscribeToMessage, unsubscribeToMessage, getMessage]);
+  }, [
+    selectedUser._id,
+    subscribeToMessage,
+    unsubscribeFromMessage,
+    getMessage,
+  ]);////////////////////////////////////////
   useEffect(() => {
     if (messageEndRef.current && messages) {
       messageEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
-
+  //////////////////////////////////////////
+  const handleAcceptRequest = () => {
+    acceptFriendRequest(selectedUser._id);
+    setIsFreind(true);
+    setFriendRequestReceived(false);
+    getMessage(selelectedUser._id);
+  };
   if (isMessageLoading) {
     return (
       <div className="flex-1 flex flex-col overflow-auto">
@@ -83,7 +101,23 @@ const ChatContainer = () => {
           </div>
         ))}
       </div>
-
+      {!isFriend && !friendRequestSent && !friendRequestReceived && (
+        <div className="p-4 text-center text-red-500">
+          You must be friends with this user to send messages.
+          <button className="btn btn-sm mt-2">Add friend</button>
+        </div>
+      )}
+      {!isFriend && friendRequestSent && !friendRequestReceived && (
+        <div className="p-4 text-center text-yellow-500">
+          Friend request sent. Waiting for acceptance.
+        </div>
+      )}
+      {!isFriend && friendRequestSent && friendRequestReceived && (
+        <div className="p-4 text-center text-green-500">
+          This user has sent you a friend request.
+          <button className="btn btn-sm mt-2">Accept friend request</button>
+        </div>
+      )}
       <MessageInput />
     </div>
   );

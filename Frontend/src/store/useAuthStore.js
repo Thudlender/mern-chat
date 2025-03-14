@@ -2,6 +2,8 @@ import { create } from "zustand";
 import api from "../services/api.js";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+import { useChatStore } from "./useChatStore.js";
+// import { getReceiverSocketId } from "../../../Backend/src/lib/socket.js";
 
 export const useAuthStore = create((set, get) => ({
   authUser: null,
@@ -31,7 +33,7 @@ export const useAuthStore = create((set, get) => ({
       const res = await api.post("/auth/signup", data);
       set({ authUser: res.data });
       get().connectSocket();
-      toast.success("Accout create Successfully");
+      toast.success("Account create Successfully");
     } catch (error) {
       toast.error(error.response.data.message || "Sign Up Failed");
     } finally {
@@ -87,6 +89,26 @@ export const useAuthStore = create((set, get) => ({
     //listen for online users
     newSocket.on("getOnlineUsers", (userIds) => {
       set({ onlineUsers: userIds });
+    });
+    socket.on("friendRequestReceived", (friendId) => {
+      const selectedUser = useChatStore.getState().selectedUser;
+      if (friendId === selectedUser._id) {
+        useChatStore.getState().setFriendRequestReceived(false);
+      }
+    });
+    socket.on("friendRequestAccepted", (friendId) => {
+      const selectedUser = useChatStore.getState().selectedUser;
+      if (friendId === selectedUser._id) {
+        useChatStore.getState().setFriendRequestReceived(false);
+        useChatStore.getState().setFriendRequestSent(false);
+        useChatStore.getState().setFriendRequestIsFriend(false);
+      }
+    });
+    socket.on("friendRequestSent", (friendId) => {
+      const selectedUser = useChatStore.getState().selectedUser;
+      if (friendId === selectedUser._id) {
+        useChatStore.getState().setFriendRequestSent(false);
+      }
     });
   },
   disconnectSocket: () => {

@@ -29,6 +29,13 @@ io.on("connection", (socket) => {
     }
     io.emit("getOnlineUsers", Object.keys(userSocketMap))
 
+    socket.on("friendRequestSent", (friendId)=>{
+        const receiverSockedId = getReceiverSocketId(friendId);
+        if(receiverSockedId) {
+            io.to(receiverSockedId).emit("friendRequestReceived",) /////////////////////
+        }
+    })
+
     socket.on("disconnect", () => {
         console.log("A User disconnected", socket.id);
         delete userSocketMap[userId];

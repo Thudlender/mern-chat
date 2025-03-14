@@ -8,5 +8,5 @@ const MessageSchema = new Schema({
   image: { type: String },
 });
 
-const MessageModel = model("message", MessageSchema);
-module.exports = MessageModel;
+const MessageModel = mongoose.model("message", MessageSchema);
+export default MessageModel;
